@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LENS INDEX — 렌즈 종류·사이즈 레퍼런스 &amp; 프롬프트 빌더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#101214;
+  --surface:#191c1f;
+  --surface-2:#212529;
+  --surface-3:#282c31;
+  --hairline:#33383e;
+  --text:#ECE9E1;
+  --text-muted:#8b9096;
+  --text-faint:#5b6066;
+  --amber:#e3a73c;
+  --amber-dim:rgba(227,167,60,0.14);
+  --cyan:#5fd4c8;
+  --cyan-dim:rgba(95,212,200,0.14);
+  --radius:14px;
+  --disp:'Oswald',sans-serif;
+  --body:'IBM Plex Sans KR','IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(227,167,60,0.07), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(95,212,200,0.05), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  line-height:1.55;
+  padding-bottom:96px;
+}
+a{color:inherit;}
+::selection{background:var(--amber);color:#141414;}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+
+/* ---------- layout shells ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+header.top{padding:56px 0 28px;}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:12px;
+  letter-spacing:.18em;
+  color:var(--amber);
+  text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--amber);display:inline-block;}
+h1.title{
+  font-family:var(--disp);
+  font-weight:600;
+  font-size:clamp(34px,5.4vw,58px);
+  letter-spacing:.01em;
+  margin:14px 0 12px;
+  text-transform:uppercase;
+}
+h1.title span{color:var(--amber);}
+p.lede{
+  color:var(--text-muted);
+  font-size:15.5px;
+  max-width:640px;
+  margin:0;
+}
+p.lede b{color:var(--text);font-weight:600;}
+
+/* ---------- hero / iris ---------- */
+.hero{
+  display:grid;
+  grid-template-columns:1.1fr 1fr;
+  gap:36px;
+  align-items:center;
+  background:linear-gradient(160deg,var(--surface),var(--surface-2));
+  border:1px solid var(--hairline);
+  border-radius:20px;
+  padding:34px 38px;
+  margin:8px 0 48px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(115deg,rgba(255,255,255,0.015) 0 1px,transparent 1px 3px);
+  pointer-events:none;
+}
+.hero-copy h2{
+  font-family:var(--disp);
+  font-weight:500;
+  font-size:22px;
+  margin:0 0 10px;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.hero-copy p{color:var(--text-muted);font-size:14.5px;margin:0 0 18px;max-width:440px;}
+.aperture-readout{
+  display:flex;gap:22px;align-items:baseline;
+  font-family:var(--mono);
+}
+.aperture-readout .f-value{font-size:34px;color:var(--amber);font-weight:600;}
+.aperture-readout .f-desc{font-size:12.5px;color:var(--text-muted);max-width:260px;}
+.iris-stage{display:flex;justify-content:center;align-items:center;}
+.iris-svg{width:min(320px,100%);height:auto;}
+.iris-blade{fill:var(--amber);opacity:.85;transition:d .35s ease;}
+.iris-ring{fill:none;stroke:var(--hairline);stroke-width:2;}
+.iris-tick{stroke:var(--text-faint);stroke-width:1;}
+.iris-label{font-family:var(--mono);font-size:7px;fill:var(--text-muted);}
+.iris-center-hole{transition:r .35s ease;}
+
+/* ---------- section headings ---------- */
+section.block{margin:56px 0;}
+.block-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;border-bottom:1px solid var(--hairline);padding-bottom:14px;}
+.block-head h3{
+  font-family:var(--disp);
+  font-size:26px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  margin:0;
+  display:flex;align-items:baseline;gap:10px;
+}
+.block-head h3 small{font-family:var(--mono);font-size:13px;color:var(--amber);font-weight:400;letter-spacing:.05em;}
+.block-head p{margin:0;color:var(--text-muted);font-size:13.5px;max-width:420px;}
+
+/* ---------- lens type cards ---------- */
+.type-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px;
+}
+.type-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius);
+  padding:18px 18px 20px;
+  cursor:pointer;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  position:relative;
+}
+.type-card:hover{border-color:#454b52;transform:translateY(-2px);}
+.type-card.selected{
+  border-color:var(--amber);
+  background:linear-gradient(160deg,var(--surface-2),var(--amber-dim));
+}
+.type-card.selected::before{
+  content:"✓ 선택됨";
+  position:absolute;top:14px;right:16px;
+  font-family:var(--mono);font-size:10.5px;color:var(--amber);letter-spacing:.04em;
+}
+.card-diagram{width:100%;height:96px;margin-bottom:10px;}
+.card-diagram svg{width:100%;height:100%;}
+.fov-cone{fill:var(--amber);opacity:.14;}
+.fov-line{stroke:var(--amber);stroke-width:1.4;}
+.fov-cyan{stroke:var(--cyan);}
+.icon-stroke{stroke:var(--cyan);stroke-width:1.6;fill:none;}
+.icon-stroke-amber{stroke:var(--amber);stroke-width:1.6;fill:none;}
+.icon-fill-faint{fill:var(--text-faint);opacity:.5;}
+.fov-label{font-family:var(--mono);font-size:11px;fill:var(--text-muted);}
+.type-name{font-family:var(--disp);font-size:18px;font-weight:600;margin:2px 0 2px;letter-spacing:.01em;}
+.type-name-en{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.type-desc{font-size:13px;color:var(--text-muted);margin:0 0 10px;}
+.type-example{font-size:12px;color:var(--text-faint);margin:0 0 10px;}
+.type-example b{color:var(--text-muted);font-weight:600;}
+.frag-preview{
+  font-family:var(--mono);font-size:10.8px;color:var(--cyan);
+  background:rgba(95,212,200,.06);border:1px solid rgba(95,212,200,.18);
+  border-radius:8px;padding:7px 9px;line-height:1.5;
+}
+
+/* ---------- chip rows (focal / aperture) ---------- */
+/* ---------- focal length cards (detailed) ---------- */
+.focal-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;
+}
+.focal-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius);
+  padding:18px 18px 20px;
+  cursor:pointer;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  position:relative;
+}
+.focal-card:hover{border-color:#454b52;transform:translateY(-2px);}
+.focal-card.selected{
+  border-color:var(--cyan);
+  background:linear-gradient(160deg,var(--surface-2),var(--cyan-dim));
+}
+.focal-card.selected::before{
+  content:"✓ 선택됨";
+  position:absolute;top:14px;right:16px;
+  font-family:var(--mono);font-size:10.5px;color:var(--cyan);letter-spacing:.04em;
+}
+.focal-head-row{display:flex;align-items:baseline;gap:10px;margin-bottom:2px;}
+.focal-mm{font-family:var(--disp);font-size:26px;font-weight:600;color:var(--text);}
+.focal-fov{font-family:var(--mono);font-size:12px;color:var(--cyan);}
+.focal-card.selected .focal-mm{color:var(--cyan);}
+.focal-tag{
+  display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+  color:var(--amber);background:var(--amber-dim);border:1px solid rgba(227,167,60,.25);
+  border-radius:6px;padding:2px 7px;margin:6px 0 10px;text-transform:uppercase;
+}
+.focal-desc{font-size:12.8px;color:var(--text-muted);margin:0 0 10px;}
+.focal-situations{font-size:12px;color:var(--text-faint);margin:0;line-height:1.6;}
+.focal-situations b{color:var(--text-muted);font-weight:600;display:block;margin-bottom:3px;font-size:11px;letter-spacing:.03em;}
+
+/* ---------- shared "expected result" box ---------- */
+.result-box{
+  margin-top:11px;
+  background:rgba(227,167,60,.06);
+  border:1px solid rgba(227,167,60,.2);
+  border-left:3px solid var(--amber);
+  border-radius:8px;
+  padding:9px 11px;
+  font-size:12px;color:var(--text-muted);line-height:1.6;
+}
+.result-label{
+  display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--amber);text-transform:uppercase;margin-bottom:4px;
+}
+
+/* ---------- aperture cards ---------- */
+.ap-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius);
+  padding:18px 18px 20px;
+  cursor:pointer;
+  transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  position:relative;
+}
+.ap-card:hover{border-color:#454b52;transform:translateY(-2px);}
+.ap-card.selected{border-color:var(--cyan);background:linear-gradient(160deg,var(--surface-2),var(--cyan-dim));}
+.ap-card.selected::before{
+  content:"✓ 선택됨";position:absolute;top:14px;right:16px;
+  font-family:var(--mono);font-size:10.5px;color:var(--cyan);letter-spacing:.04em;
+}
+.ap-head-row{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;}
+.ap-f{font-family:var(--disp);font-size:26px;font-weight:600;color:var(--text);}
+.ap-card.selected .ap-f{color:var(--cyan);}
+.ap-label{font-family:var(--mono);font-size:12px;color:var(--cyan);}
+.ap-dof{margin-bottom:11px;}
+.ap-dof-track{
+  height:12px;border-radius:6px;overflow:hidden;position:relative;
+  background:repeating-linear-gradient(90deg,var(--surface-3) 0 6px,var(--surface-2) 6px 12px);
+  border:1px solid var(--hairline);
+}
+.ap-dof-zone{
+  position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  border-radius:6px;transition:width .3s ease;
+}
+.ap-dof-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:5px;}
+.ap-use{font-size:12px;color:var(--text-faint);margin:0;line-height:1.6;}
+.ap-use b{color:var(--text-muted);font-weight:600;display:block;margin-bottom:3px;font-size:11px;letter-spacing:.03em;}
+
+/* ---------- infographic panels ---------- */
+.infographic{
+  background:linear-gradient(160deg,var(--surface),var(--surface-2));
+  border:1px solid var(--hairline);
+  border-radius:16px;
+  padding:22px 24px 24px;
+  margin-top:20px;
+}
+.infographic-title{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--amber);margin:0 0 4px;
+}
+.infographic-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 18px;}
+.infographic svg{width:100%;height:auto;display:block;}
+.ig-cap{fill:var(--text-muted);font-family:var(--mono);font-size:9px;}
+.ig-cap-strong{fill:var(--text);font-family:var(--disp);font-weight:600;}
+.ig-cap-cyan{fill:var(--cyan);font-family:var(--mono);font-size:9px;}
+.ig-cap-amber{fill:var(--amber);font-family:var(--mono);font-size:9px;}
+
+/* ---------- prompt monitor ---------- */
+.monitor{
+  position:fixed;left:0;right:0;bottom:0;
+  background:rgba(16,18,20,.94);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--hairline);
+  z-index:40;
+}
+.monitor-inner{max-width:1180px;margin:0 auto;padding:14px 28px 16px;}
+.monitor-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+.monitor-title{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase;}
+.monitor-title b{color:var(--amber);}
+.monitor-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{
+  font-family:var(--body);font-size:12.5px;font-weight:600;
+  background:var(--surface-3);color:var(--text);
+  border:1px solid var(--hairline);border-radius:8px;
+  padding:8px 13px;cursor:pointer;transition:all .15s ease;
+}
+.btn:hover{border-color:#4c525a;}
+.btn.primary{background:var(--amber);color:#181000;border-color:var(--amber);}
+.btn.primary:hover{background:#f0b24f;}
+.monitor-text{
+  font-family:var(--mono);font-size:13px;color:var(--text);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:10px;
+  padding:12px 14px;min-height:20px;max-height:120px;overflow-y:auto;
+}
+.monitor-text .placeholder{color:var(--text-faint);}
+.toast{
+  position:fixed;bottom:118px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--amber);color:#181000;font-weight:600;font-size:12.5px;
+  padding:9px 16px;border-radius:20px;opacity:0;pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;z-index:50;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer.note{
+  max-width:1180px;margin:40px auto 0;padding:0 28px 20px;
+  font-size:12px;color:var(--text-faint);
+}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr;}
+  .wrap{padding:0 18px;}
+  header.top{padding:36px 0 20px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">LENS INDEX · CINE &amp; PHOTO OPTICS REFERENCE</div>
+    <h1 class="title">렌즈 <span>종류</span> &amp; <span>사이즈</span> 가이드</h1>
+    <p class="lede">렌즈의 <b>광학 설계 종류</b>, <b>초점거리(사이즈)</b>, <b>조리개값</b>을 다이어그램으로 살펴보고, 카드를 눌러 조합하면 AI 이미지 생성용 <b>영문 프롬프트</b>가 자동으로 완성됩니다.</p>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <h2>조리개 · APERTURE IRIS</h2>
+      <p>조리개값(f-stop)은 렌즈 안쪽 블레이드가 만드는 구멍의 크기입니다. 숫자가 작을수록 구멍이 커져 빛이 많이 들어오고 배경이 흐려지며, 숫자가 클수록 구멍이 좁아져 전체적으로 선명해집니다. 아래 조리개 칩을 선택하면 이 다이어그램이 실시간으로 반응합니다.</p>
+      <div class="aperture-readout">
+        <div class="f-value" id="irisReadout">f/4</div>
+        <div class="f-desc" id="irisDesc">중간 심도 — 피사체는 선명하고 배경은 부드럽게 흐려집니다.</div>
+      </div>
+    </div>
+    <div class="iris-stage">
+      <svg class="iris-svg" viewBox="0 0 220 220" id="irisSvg" aria-label="조리개 다이어그램">
+        <circle class="iris-ring" cx="110" cy="110" r="96"/>
+        <g id="irisTicks"></g>
+        <polygon class="iris-blade" id="irisBlade" points=""/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" id="types">
+    <div class="block-head">
+      <h3>렌즈 종류 <small>LENS TYPE</small></h3>
+      <p>광학 설계와 용도에 따른 9가지 대표 렌즈. 각 카드의 원뿔/아이콘 도식은 화각(FOV)과 특성을 나타냅니다.</p>
+    </div>
+    <div class="type-grid" id="typeGrid"></div>
+  </section>
+
+  <section class="block" id="focals">
+    <div class="block-head">
+      <h3>초점거리 사이즈 <small>FOCAL LENGTH</small></h3>
+      <p>풀프레임 환산 mm 기준. 짧을수록 화각이 넓고, 길수록 좁고 압축된 화면이 됩니다. 카드를 눌러 상세 특성과 어울리는 촬영 상황을 확인하세요.</p>
+    </div>
+    <div class="focal-grid" id="focalRow"></div>
+
+    <div class="infographic">
+      <p class="infographic-title">INFOGRAPHIC · 같은 인물, 다른 초점거리</p>
+      <p class="infographic-sub">피사체 크기를 같게 맞추려고 촬영 거리를 조절하면, 초점거리에 따라 <b>배경이 담기는 범위와 압축감</b>이 이렇게 달라집니다. 짧을수록 배경이 넓고 멀어 보이고, 길수록 배경이 좁고 크게 당겨집니다.</p>
+      <svg viewBox="0 0 760 260" role="img" aria-label="초점거리별 화각과 배경 압축 비교">
+        <!-- 4 mini frames: 24 / 50 / 85 / 200 -->
+        <!-- each frame: same subject size, different background coverage -->
+        <g transform="translate(10,20)">
+          <text class="ig-cap-strong" x="80" y="0" text-anchor="middle" font-size="16">24mm</text>
+          <text class="ig-cap-amber" x="80" y="14" text-anchor="middle">광각 · 배경 넓게</text>
+          <rect x="10" y="24" width="140" height="150" rx="6" fill="#141719" stroke="#33383e"/>
+          <!-- wide background: many small elements -->
+          <line x1="10" y1="120" x2="150" y2="120" stroke="#33383e"/>
+          <circle cx="30" cy="60" r="6" class="icon-fill-faint"/><circle cx="55" cy="52" r="5" class="icon-fill-faint"/>
+          <circle cx="120" cy="58" r="6" class="icon-fill-faint"/><circle cx="132" cy="70" r="4" class="icon-fill-faint"/>
+          <rect x="95" y="80" width="14" height="30" class="icon-fill-faint"/>
+          <!-- subject -->
+          <circle cx="80" cy="115" r="14" fill="#e3a73c"/><rect x="70" y="128" width="20" height="42" rx="6" fill="#e3a73c"/>
+          <text class="ig-cap" x="80" y="192" text-anchor="middle">촬영거리 가까움</text>
+        </g>
+        <g transform="translate(200,20)">
+          <text class="ig-cap-strong" x="80" y="0" text-anchor="middle" font-size="16">50mm</text>
+          <text class="ig-cap-amber" x="80" y="14" text-anchor="middle">표준 · 자연스러움</text>
+          <rect x="10" y="24" width="140" height="150" rx="6" fill="#141719" stroke="#33383e"/>
+          <line x1="10" y1="120" x2="150" y2="120" stroke="#33383e"/>
+          <circle cx="42" cy="62" r="8" class="icon-fill-faint"/><circle cx="118" cy="60" r="8" class="icon-fill-faint"/>
+          <rect x="92" y="78" width="18" height="32" class="icon-fill-faint"/>
+          <circle cx="80" cy="112" r="15" fill="#e3a73c"/><rect x="69" y="126" width="22" height="46" rx="6" fill="#e3a73c"/>
+          <text class="ig-cap" x="80" y="192" text-anchor="middle">촬영거리 보통</text>
+        </g>
+        <g transform="translate(390,20)">
+          <text class="ig-cap-strong" x="80" y="0" text-anchor="middle" font-size="16">85mm</text>
+          <text class="ig-cap-cyan" x="80" y="14" text-anchor="middle">단망원 · 배경 흐림</text>
+          <rect x="10" y="24" width="140" height="150" rx="6" fill="#141719" stroke="#33383e"/>
+          <line x1="10" y1="120" x2="150" y2="120" stroke="#2a2f34"/>
+          <circle cx="48" cy="64" r="12" fill="#282c31"/><circle cx="112" cy="60" r="13" fill="#282c31"/>
+          <rect x="88" y="76" width="24" height="36" rx="3" fill="#282c31"/>
+          <circle cx="80" cy="110" r="16" fill="#5fd4c8"/><rect x="68" y="125" width="24" height="48" rx="6" fill="#5fd4c8"/>
+          <text class="ig-cap" x="80" y="192" text-anchor="middle">촬영거리 멀어짐</text>
+        </g>
+        <g transform="translate(580,20)">
+          <text class="ig-cap-strong" x="80" y="0" text-anchor="middle" font-size="16">200mm</text>
+          <text class="ig-cap-cyan" x="80" y="14" text-anchor="middle">망원 · 강한 압축</text>
+          <rect x="10" y="24" width="140" height="150" rx="6" fill="#141719" stroke="#33383e"/>
+          <!-- compressed: big blurry background elements filling frame -->
+          <circle cx="55" cy="70" r="22" fill="#242a2e"/><circle cx="115" cy="66" r="24" fill="#242a2e"/>
+          <rect x="80" y="70" width="40" height="50" rx="4" fill="#242a2e"/>
+          <circle cx="80" cy="108" r="17" fill="#5fd4c8"/><rect x="67" y="124" width="26" height="50" rx="6" fill="#5fd4c8"/>
+          <text class="ig-cap" x="80" y="192" text-anchor="middle">촬영거리 매우 멂</text>
+        </g>
+        <!-- arrow scale -->
+        <g transform="translate(10,236)">
+          <line x1="10" y1="6" x2="730" y2="6" stroke="#454b52" stroke-width="1"/>
+          <polygon points="730,6 722,2 722,10" fill="#454b52"/>
+          <text class="ig-cap-amber" x="10" y="2" >← 화각 넓음 · 원근 과장</text>
+          <text class="ig-cap-cyan" x="730" y="2" text-anchor="end">화각 좁음 · 배경 압축·격리 →</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" id="apertures">
+    <div class="block-head">
+      <h3>조리개 값 <small>APERTURE / DOF</small></h3>
+      <p>피사계 심도(DOF)를 결정하는 f값. 위 히어로 다이어그램과 연동됩니다. 카드를 눌러 용도와 기대 결과물을 확인하세요.</p>
+    </div>
+    <div class="focal-grid" id="apertureRow"></div>
+
+    <div class="infographic">
+      <p class="infographic-title">INFOGRAPHIC · 조리개와 초점 범위</p>
+      <p class="infographic-sub">같은 장면을 f값만 바꿔 찍으면 <b>선명하게 잡히는 앞뒤 구간(심도)</b>이 달라집니다. 조리개를 열수록(f값↓) 피사체 한 점만 남고 앞뒤가 녹아내리며, 조일수록(f값↑) 전경부터 배경까지 또렷해집니다.</p>
+      <svg viewBox="0 0 760 250" role="img" aria-label="조리개값별 초점 범위 비교">
+        <!-- horizontal scene: near(왼쪽) -> subject(중앙) -> far(오른쪽), rows per f-stop -->
+        <g transform="translate(10,10)">
+          <text class="ig-cap" x="8" y="12">근경(앞)</text>
+          <text class="ig-cap-strong" x="380" y="12" text-anchor="middle" font-size="11">피사체</text>
+          <text class="ig-cap" x="740" y="12" text-anchor="end">원경(뒤)</text>
+        </g>
+        <!-- rows -->
+        <g transform="translate(10,24)" font-size="10">
+          <!-- each row: track + focus zone centered on subject (x=380 in local of 740 width). scale zone widths -->
+          <!-- f/1.4 -->
+          <g transform="translate(0,0)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="356" y="0" width="98" height="22" rx="4" fill="#5fd4c8" opacity="0.85"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap-cyan" x="4" y="15">f/1.4</text>
+          </g>
+          <!-- f/2.8 -->
+          <g transform="translate(0,30)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="335" y="0" width="140" height="22" rx="4" fill="#5fd4c8" opacity="0.8"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap-cyan" x="4" y="15">f/2.8</text>
+          </g>
+          <!-- f/4 -->
+          <g transform="translate(0,60)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="300" y="0" width="210" height="22" rx="4" fill="#5fd4c8" opacity="0.72"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap-cyan" x="4" y="15">f/4</text>
+          </g>
+          <!-- f/5.6 -->
+          <g transform="translate(0,90)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="250" y="0" width="310" height="22" rx="4" fill="#a9cf7a" opacity="0.7"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap" x="4" y="15" fill="#a9cf7a">f/5.6</text>
+          </g>
+          <!-- f/8 -->
+          <g transform="translate(0,120)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="150" y="0" width="500" height="22" rx="4" fill="#e3a73c" opacity="0.62"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap-amber" x="4" y="15">f/8</text>
+          </g>
+          <!-- f/16 -->
+          <g transform="translate(0,150)">
+            <rect x="70" y="0" width="670" height="22" rx="4" fill="#141719" stroke="#33383e"/>
+            <rect x="74" y="0" width="662" height="22" rx="4" fill="#e3a73c" opacity="0.6"/>
+            <circle cx="405" cy="11" r="6" fill="#101214"/>
+            <text class="ig-cap-amber" x="4" y="15">f/16</text>
+          </g>
+        </g>
+        <g transform="translate(10,214)">
+          <rect x="70" y="6" width="20" height="10" rx="2" fill="#5fd4c8" opacity="0.85"/>
+          <text class="ig-cap" x="96" y="15">= 선명하게 잡히는 초점 범위 (밖은 흐려짐)</text>
+          <text class="ig-cap-amber" x="740" y="15" text-anchor="end">아래로 갈수록 전체가 선명 →</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <footer class="note">
+    완성된 프롬프트는 Midjourney · Stable Diffusion · Kling · Runway 등 이미지/영상 생성 도구에 그대로 붙여넣어 사용할 수 있습니다. 다이어그램은 개념 이해를 돕기 위한 도식이며 실제 렌즈 사양과 다를 수 있습니다.
+  </footer>
+</div>
+
+<div class="monitor">
+  <div class="monitor-inner">
+    <div class="monitor-head">
+      <div class="monitor-title">PROMPT MONITOR &nbsp;<b id="selCount">0/3</b>&nbsp; 선택</div>
+      <div class="monitor-actions">
+        <button class="btn" id="btnRandom">랜덤 조합</button>
+        <button class="btn" id="btnReset">초기화</button>
+        <button class="btn primary" id="btnCopy">프롬프트 복사</button>
+      </div>
+    </div>
+    <div class="monitor-text" id="promptText"><span class="placeholder">위에서 렌즈 종류 · 초점거리 · 조리개를 선택하면 여기에 프롬프트가 조립됩니다.</span></div>
+  </div>
+</div>
+<div class="toast" id="toast">클립보드에 복사했습니다</div>
+
+<script>
+/* ================= DATA ================= */
+
+function fovCone(fov){
+  const apex={x:80,y:104};
+  const half=(fov/2)*Math.PI/180;
+  const dist=88;
+  const lx=(apex.x-Math.sin(half)*dist).toFixed(1);
+  const rx=(apex.x+Math.sin(half)*dist).toFixed(1);
+  const ty=(apex.y-Math.cos(half)*dist).toFixed(1);
+  return `<svg viewBox="0 0 160 116">
+    <polygon class="fov-cone" points="${apex.x},${apex.y} ${lx},${ty} ${rx},${ty}"/>
+    <line class="fov-line" x1="${apex.x}" y1="${apex.y}" x2="${lx}" y2="${ty}"/>
+    <line class="fov-line" x1="${apex.x}" y1="${apex.y}" x2="${rx}" y2="${ty}"/>
+    <circle cx="${apex.x}" cy="${apex.y}" r="3.4" fill="#ECE9E1"/>
+    <text class="fov-label" x="80" y="16" text-anchor="middle">${fov}°</text>
+  </svg>`;
+}
+
+const ICONS = {
+  fisheye:`<svg viewBox="0 0 160 116">
+    <circle class="icon-stroke-amber" cx="80" cy="58" r="42"/>
+    <path class="icon-stroke" d="M40 58 Q80 20 120 58" />
+    <path class="icon-stroke" d="M40 58 Q80 96 120 58" />
+    <path class="icon-stroke" d="M52 30 Q80 58 52 86" />
+    <path class="icon-stroke" d="M108 30 Q80 58 108 86" />
+    <circle cx="80" cy="58" r="3" fill="#e3a73c"/>
+  </svg>`,
+  macro:`<svg viewBox="0 0 160 116">
+    <circle class="icon-stroke-amber" cx="62" cy="52" r="26"/>
+    <line class="icon-stroke-amber" x1="81" y1="71" x2="106" y2="96"/>
+    <line class="icon-stroke" x1="48" y1="40" x2="76" y2="64"/>
+    <line class="icon-stroke" x1="76" y1="40" x2="48" y2="64"/>
+    <line class="icon-stroke" x1="48" y1="52" x2="76" y2="52"/>
+    <rect x="4" y="90" width="152" height="14" class="icon-fill-faint"/>
+    <rect x="4" y="8" width="152" height="10" class="icon-fill-faint" opacity="0.25"/>
+  </svg>`,
+  tiltshift:`<svg viewBox="0 0 160 116">
+    <rect x="14" y="14" width="132" height="16" class="icon-fill-faint" opacity="0.35"/>
+    <rect class="icon-stroke-amber" x="14" y="46" width="132" height="24" fill="none"/>
+    <rect x="14" y="86" width="132" height="16" class="icon-fill-faint" opacity="0.35"/>
+    <line class="icon-stroke" x1="30" y1="30" x2="46" y2="46"/>
+    <line class="icon-stroke" x1="130" y1="86" x2="114" y2="70"/>
+  </svg>`,
+  anamorphic:`<svg viewBox="0 0 160 116">
+    <rect class="icon-stroke-amber" x="8" y="34" width="144" height="48" rx="4" fill="none"/>
+    <ellipse class="icon-stroke" cx="52" cy="58" rx="16" ry="8"/>
+    <ellipse class="icon-stroke" cx="104" cy="58" rx="10" ry="5"/>
+    <line class="icon-stroke-amber" x1="8" y1="58" x2="152" y2="58" stroke-dasharray="2 4"/>
+  </svg>`
+};
+
+const LENS_TYPES = [
+  {id:'ultrawide', ko:'초광각 렌즈', en:'ULTRA-WIDE', fov:115,
+    desc:'FOV 100°대 이상. 프레임 가장자리로 갈수록 형태가 늘어지는 배럴 왜곡이 뚜렷합니다.',
+    ex:'웅장한 풍경, 좁은 실내를 넓게, 익스트림 건축', 
+    frag:'ultra wide-angle lens (14mm), expansive field of view, dramatic barrel distortion, deep spatial depth'},
+  {id:'wide', ko:'광각 렌즈', en:'WIDE-ANGLE', fov:84,
+    desc:'FOV 60~90°대. 원근감이 과장되어 가까운 피사체는 크게, 먼 배경은 확장되어 보입니다.',
+    ex:'여행 스냅, 그룹샷, 환경 인물사진',
+    frag:'wide-angle lens (24mm), exaggerated perspective, strong foreground emphasis, expansive scene'},
+  {id:'standard', ko:'표준 렌즈', en:'STANDARD / NORMAL', fov:46,
+    desc:'FOV 약 40~50°. 인간 눈과 유사한 자연스러운 원근감, 왜곡이 거의 없습니다.',
+    ex:'다큐멘터리, 스트리트 포토, 정석 인물사진',
+    frag:'standard 50mm lens, natural perspective, minimal distortion, eye-level realism'},
+  {id:'telephoto', ko:'망원 렌즈', en:'TELEPHOTO', fov:20,
+    desc:'FOV 10~25°대. 원근이 압축되어 배경이 실제보다 가까워 보이고, 피사체가 배경과 분리됩니다.',
+    ex:'인물 클로즈업, 스포츠, 콘서트',
+    frag:'telephoto lens (135mm), compressed perspective, isolated subject, flattened background layers'},
+  {id:'supertele', ko:'초망원 렌즈', en:'SUPER-TELEPHOTO', fov:7,
+    desc:'FOV 10° 미만. 극단적인 압축과 매우 좁은 화각으로 먼 피사체를 크게 확대합니다.',
+    ex:'야생동물, 항공샷, 원거리 스포츠 중계',
+    frag:'super-telephoto lens (400mm), extreme background compression, narrow field of view, distant subject magnification'},
+  {id:'macro', ko:'매크로 렌즈', en:'MACRO', fov:null, icon:'macro',
+    desc:'초근접 촬영이 가능하며 1:1 이상의 배율을 지원합니다. 심도가 극도로 얕습니다.',
+    ex:'곤충, 보석, 물방울, 표면 질감 디테일',
+    frag:'macro lens, 1:1 magnification, extremely shallow depth of field, fine surface texture detail'},
+  {id:'fisheye', ko:'어안 렌즈', en:'FISHEYE', fov:null, icon:'fisheye',
+    desc:'FOV 180°이상. 직선이 곡선으로 휘는 강한 구형 왜곡이 특징이며 원형 프레임을 만들기도 합니다.',
+    ex:'실험적 연출, 스케이트보드, 몰입형 실내',
+    frag:'fisheye lens, 180-degree field of view, extreme spherical curvature distortion, circular framing'},
+  {id:'tiltshift', ko:'틸트-시프트 렌즈', en:'TILT-SHIFT', fov:null, icon:'tiltshift',
+    desc:'렌즈면을 기울이거나(틸트) 이동(시프트)시켜 초점면과 원근을 조정합니다.',
+    ex:'미니어처 효과, 왜곡 없는 건축 사진',
+    frag:'tilt-shift lens, selective focus plane, miniature diorama effect, corrected architectural verticals'},
+  {id:'anamorphic', ko:'아나모픽 렌즈', en:'ANAMORPHIC', fov:null, icon:'anamorphic',
+    desc:'이미지를 수평으로 압축 촬영 후 신장시켜 시네마스코프 비율을 만듭니다. 타원형 보케가 특징.',
+    ex:'시네마틱 영상, 광고 필름룩',
+    frag:'anamorphic lens, 2.39:1 cinematic aspect ratio, oval bokeh, horizontal blue lens flare, subtle edge distortion'}
+];
+
+const FOCALS = [
+  {mm:8, fov:180, sub:'어안급', tag:'FISHEYE-CLASS',
+    desc:'화각 180° 안팎. 직선이 화면 가장자리에서 크게 휘어지는 극단적 구형 왜곡이 나타나며, 눈에 보이는 것보다 훨씬 넓은 공간을 한 프레임에 담습니다.',
+    situations:['아주 좁은 실내 공간을 벽까지 전부 담아야 할 때','스케이트보드·서핑 등 익스트림 스포츠 POV 촬영','실험적·초현실적 느낌의 아트 사진','비좁은 자동차 내부, 캡슐호텔 같은 공간 리뷰 영상'],
+    result:'화면이 공처럼 휘어져 지평선과 수직선이 둥글게 왜곡됩니다. 중심부는 크게 부풀고 가장자리는 빨려 들어가듯 압축돼, 현실감보다 강렬한 시각적 임팩트를 주는 결과물이 나옵니다.'},
+  {mm:14, fov:114, sub:'초광각', tag:'ULTRA-WIDE',
+    desc:'화각 110°대. 가까운 전경은 과장되게 크고 뒤쪽은 급격히 작아지는 원근 왜곡이 강하게 나타나 압도적인 스케일감을 줍니다.',
+    situations:['은하수·별 궤적 등 하늘을 넓게 담는 천체 사진','협곡·산맥 같은 웅장한 풍경 사진','좁은 호텔룸·스튜디오 인테리어를 벽까지 다 보이게 촬영','여러 명이 가까이 모인 그룹 셀피'],
+    result:'앞뒤 거리 차이가 실제보다 크게 벌어져 공간이 깊고 웅장하게 표현됩니다. 전경 사물은 밀어붙이듯 크게, 배경은 멀리 물러난 듯 담겨 극적인 원근감의 결과물이 나옵니다.'},
+  {mm:20, fov:94, sub:'초광각', tag:'ULTRA-WIDE',
+    desc:'화각 90°대 초반. 14mm보다 왜곡은 완만해지지만 여전히 광활한 공간감을 유지해, 왜곡과 자연스러움 사이 균형점에 있습니다.',
+    situations:['해질녘·야경 도시 풍경 사진','좁은 골목이나 계단 등 구도가 다이내믹한 스트리트 사진','실내 인테리어를 왜곡 적게 담고 싶을 때','캠핑·차박 등 넓은 공간감이 필요한 브이로그'],
+    result:'넓은 공간감은 살리면서 인물·건물의 형태 왜곡은 크게 줄어듭니다. 광활하되 과하지 않은, 시원하고 안정적인 화면의 결과물을 얻습니다.'},
+  {mm:24, fov:84, sub:'광각', tag:'WIDE',
+    desc:'광각의 대표 화각. 인물과 배경을 함께 자연스럽게 담을 수 있지만, 프레임 가장자리에 인물을 배치하면 신체가 늘어져 보일 수 있어 구도에 주의가 필요합니다.',
+    situations:['배경까지 함께 보여주는 환경 인물사진','웨딩·이벤트 현장 스냅','여행지에서 장소와 사람을 한 프레임에','브이로그 셀프캠(팔 뻗어 촬영 시 왜곡 최소)'],
+    result:'인물과 배경 장소가 함께 담겨 "어디에서 무엇을 하는지"가 한눈에 읽히는 결과물이 나옵니다. 현장감·상황감이 강조되는 대신, 얼굴만 크게 부각시키기에는 부적합합니다.'},
+  {mm:35, fov:63, sub:'광각~표준', tag:'DOCUMENTARY',
+    desc:'다큐멘터리 사진가들이 즐겨 쓰는 화각. 왜곡이 크게 줄어 자연스러우면서도 배경 맥락을 충분히 살릴 수 있어 스토리텔링에 유리합니다.',
+    situations:['다큐멘터리·포토저널리즘','일상 기록 스트리트 포토','데일리 브이로그, 라이프스타일 촬영','한 명 이상의 인물과 주변 상황을 함께 보여줄 때'],
+    result:'인물과 주변 맥락이 균형 있게 담겨, 보는 사람이 이야기의 상황 속에 함께 있는 듯한 자연스러운 결과물이 나옵니다. 왜곡이 적어 편안하게 읽힙니다.'},
+  {mm:50, fov:46, sub:'표준', tag:'NORMAL',
+    desc:'인간의 시야와 가장 비슷한 화각으로 왜곡이 거의 없습니다. "보이는 그대로" 찍히는 느낌 때문에 표준(정상) 렌즈라 불립니다.',
+    situations:['상반신~전신 인물 사진','제품·상품 사진','범용 스냅, 첫 렌즈로 연습하기 좋은 화각','실내 인물 인터뷰 촬영'],
+    result:'눈으로 본 그대로에 가장 가까운, 과장 없는 정직한 결과물이 나옵니다. 원근·비율이 자연스러워 피사체를 왜곡 없이 사실적으로 전달할 때 안정적입니다.'},
+  {mm:85, fov:28, sub:'단망원', tag:'PORTRAIT',
+    desc:'포트레이트의 정석으로 불리는 화각. 약간의 원근 압축으로 얼굴 비율이 가장 자연스럽게 보이고, 배경을 부드럽게 흐려 인물을 돋보이게 합니다.',
+    situations:['얼굴 위주 클로즈업 인물 사진','웨딩 본식·스냅 촬영','패션·뷰티 화보','배경을 흐리고 인물만 강조하고 싶을 때'],
+    result:'얼굴 비율이 가장 예쁘게 잡히고 배경이 부드럽게 녹아, 인물만 도드라지는 화보 같은 결과물이 나옵니다. 인물과 배경의 분리감이 뛰어납니다.'},
+  {mm:135, fov:18, sub:'망원', tag:'TELEPHOTO',
+    desc:'뚜렷한 원근 압축이 나타나 배경이 실제보다 가깝고 크게 보이며, 피사체와 배경이 완전히 분리되는 느낌을 줍니다.',
+    situations:['콘서트·무대 공연 촬영(멀리서 클로즈업)','야외 인물 포트레이트(배경 완전히 흐리기)','축구·야구 등 필드 사이드라인 스포츠 촬영','멀리 있는 건축물의 일부를 압축해서 담기'],
+    result:'배경이 앞으로 당겨진 듯 압축돼 피사체 뒤에 크게 자리 잡고, 멀리서도 대상을 꽉 채워 담을 수 있습니다. 배경을 완전히 흐려 극적인 집중감을 주는 결과물이 나옵니다.'},
+  {mm:200, fov:12, sub:'망원', tag:'TELEPHOTO',
+    desc:'상당한 압축 효과와 좁은 화각으로 먼 거리의 피사체를 크게 끌어올 수 있습니다. 손떨림 영향이 커져 빠른 셔터스피드나 손떨림 보정이 중요해집니다.',
+    situations:['비교적 가까운 거리의 야생동물 촬영','육상·필드 스포츠 경기 중계','에어쇼·항공 촬영','멀리 있는 풍경의 일부를 클로즈업하듯 압축'],
+    result:'접근하기 어려운 대상을 코앞에서 본 듯 크게 담고, 여러 층의 배경이 겹겹이 눌려 회화적으로 쌓입니다. 원근감이 사라진 평평하고 응축된 결과물이 특징입니다.'},
+  {mm:400, fov:6, sub:'초망원', tag:'SUPER-TELE',
+    desc:'극단적인 압축과 확대가 가능한 화각. 아주 멀리 있는 피사체도 크게 담을 수 있지만 화각이 매우 좁아 피사체를 프레임에 담기 어렵고 삼각대·모노포드가 사실상 필수입니다.',
+    situations:['멀리 있는 야생동물·조류 관찰 사진','프로 스포츠 경기 하이라이트 중계','달 표면 등 천체 사진','안전거리를 확보해야 하는 위험한 피사체 촬영'],
+    result:'맨눈으로는 점처럼 보이던 대상이 화면을 가득 채웁니다. 공간이 극도로 압축돼 배경과 피사체가 거의 한 평면처럼 붙어 보이는, 망원 특유의 강한 격리감이 나타납니다.'}
+];
+
+const APERTURES = [
+  {f:'1.4', r:78, dof:6, label:'매우 얕은 심도',
+    desc:'매우 얕은 심도 — 배경이 완전히 흐려지는 크리미 보케.',
+    use:'인물 클로즈업, 야간·저조도 촬영, 감성적인 보케 배경, 음식·제품 접사',
+    result:'초점 맞은 지점만 칼같이 선명하고 앞뒤는 크림처럼 뭉개집니다. 배경 불빛이 큰 원형 보케로 번져 몽환적이고 감성적인 결과물이 나옵니다.',
+    frag:'shot at f/1.4, extremely shallow depth of field, creamy background bokeh'},
+  {f:'2.8', r:62, dof:12, label:'얕은 심도',
+    desc:'얕은 심도 — 피사체가 배경과 뚜렷하게 분리됩니다.',
+    use:'인물 사진, 실내 이벤트, 스포츠(빛 확보), 웨딩 스냅',
+    result:'피사체는 또렷하고 배경은 부드럽게 흐려져 대상이 확실히 도드라집니다. 보케는 유지하되 f/1.4보다 초점 범위가 조금 넉넉해 실수가 적은 결과물입니다.',
+    frag:'shot at f/2.8, shallow depth of field, subject clearly separated from background'},
+  {f:'4', r:50, dof:22, label:'중간 심도',
+    desc:'중간 심도 — 피사체는 선명하고 배경은 부드럽게 흐려집니다.',
+    use:'상반신·단체 인물, 실내 스냅, 브이로그, 요리 영상',
+    result:'인물 여러 명도 함께 초점 안에 들어오면서 배경은 은은하게 흐려집니다. 분리감과 정보량의 균형이 좋은 무난한 결과물이 나옵니다.',
+    frag:'shot at f/4, moderate depth of field, gently softened background'},
+  {f:'5.6', r:42, dof:40, label:'균형 심도',
+    desc:'균형잡힌 심도 — 배경이 은은하게 인식됩니다.',
+    use:'단체 사진, 여행 스냅, 일반 풍경, 스트리트',
+    result:'앞줄부터 뒷줄까지 대체로 선명하게 잡히고 배경 형태도 알아볼 수 있습니다. 상황과 장소가 함께 읽히는 실용적인 결과물입니다.',
+    frag:'shot at f/5.6, balanced depth of field, background softly discernible'},
+  {f:'8', r:32, dof:64, label:'깊은 심도',
+    desc:'깊은 심도 — 장면 대부분이 선명합니다.',
+    use:'풍경 사진, 건축·인테리어, 여행 기록, 집단 촬영',
+    result:'화면 대부분이 앞뒤로 고르게 선명해집니다. 렌즈 성능이 가장 좋게 나오는 구간이라 디테일이 살아있는 또렷한 결과물을 얻습니다.',
+    frag:'shot at f/8, deep depth of field, most of the scene in focus'},
+  {f:'16', r:18, dof:96, label:'매우 깊은 심도',
+    desc:'매우 깊은 심도 — 전경부터 배경까지 모두 선명(풍경·건축용).',
+    use:'대풍경, 태양 광채(빛갈라짐) 연출, 근경+원경 동시 강조',
+    result:'바로 앞 돌부터 저 멀리 산까지 전부 초점에 들어옵니다. 태양이 별처럼 갈라지는 광채 효과도 얻지만, 회절로 인해 미세한 선명도는 다소 떨어질 수 있습니다.',
+    frag:'shot at f/16, extensive depth of field, sharp focus from foreground to background'}
+];
+
+/* ================= STATE ================= */
+const state = { type:null, focal:null, aperture:null };
+
+/* ================= RENDER: TYPE CARDS ================= */
+const typeGrid = document.getElementById('typeGrid');
+LENS_TYPES.forEach(t=>{
+  const card = document.createElement('div');
+  card.className='type-card';
+  card.dataset.id=t.id;
+  const diagram = t.icon ? ICONS[t.icon] : fovCone(t.fov);
+  card.innerHTML = `
+    <div class="card-diagram">${diagram}</div>
+    <span class="type-name-en">${t.en}</span>
+    <div class="type-name">${t.ko}</div>
+    <p class="type-desc">${t.desc}</p>
+    <p class="type-example"><b>예시 활용</b> · ${t.ex}</p>
+    <div class="frag-preview">${t.frag}</div>
+  `;
+  card.addEventListener('click', ()=>{
+    state.type = (state.type===t.id) ? null : t.id;
+    renderSelections();
+  });
+  typeGrid.appendChild(card);
+});
+
+/* ================= RENDER: FOCAL CARDS ================= */
+const focalRow = document.getElementById('focalRow');
+FOCALS.forEach(f=>{
+  const card=document.createElement('div');
+  card.className='focal-card';
+  card.dataset.mm=f.mm;
+  card.innerHTML=`
+    <div class="focal-head-row">
+      <span class="focal-mm">${f.mm}mm</span>
+      <span class="focal-fov">FOV ${f.fov}°</span>
+    </div>
+    <span class="focal-tag">${f.tag} · ${f.sub}</span>
+    <p class="focal-desc">${f.desc}</p>
+    <p class="focal-situations"><b>어울리는 용도</b>${f.situations.map(s=>'· '+s).join('<br>')}</p>
+    <div class="result-box"><span class="result-label">기대 결과물</span>${f.result}</div>
+  `;
+  card.addEventListener('click',()=>{
+    state.focal = (state.focal===f.mm) ? null : f.mm;
+    renderSelections();
+  });
+  focalRow.appendChild(card);
+});
+
+/* ================= RENDER: APERTURE CARDS ================= */
+const apertureRow = document.getElementById('apertureRow');
+APERTURES.forEach(a=>{
+  const card=document.createElement('div');
+  card.className='ap-card';
+  card.dataset.f=a.f;
+  // DOF infographic: a bar where a highlighted "in-focus" zone widens with f-number
+  const focusPct = a.dof; // 6..96
+  card.innerHTML=`
+    <div class="ap-head-row">
+      <span class="ap-f">f/${a.f}</span>
+      <span class="ap-label">${a.label}</span>
+    </div>
+    <div class="ap-dof">
+      <div class="ap-dof-track">
+        <div class="ap-dof-zone" style="width:${focusPct}%"></div>
+      </div>
+      <div class="ap-dof-legend"><span>초점 범위(심도)</span><span>${focusPct<25?'좁음':focusPct<60?'보통':'넓음'}</span></div>
+    </div>
+    <p class="ap-use"><b>어울리는 용도</b>${a.use}</p>
+    <div class="result-box"><span class="result-label">기대 결과물</span>${a.result}</div>
+  `;
+  card.addEventListener('click',()=>{
+    state.aperture = (state.aperture===a.f) ? null : a.f;
+    renderSelections();
+    updateIris();
+  });
+  apertureRow.appendChild(card);
+});
+
+/* ================= IRIS DIAGRAM ================= */
+const irisTicksG = document.getElementById('irisTicks');
+const irisBlade = document.getElementById('irisBlade');
+const irisReadout = document.getElementById('irisReadout');
+const irisDesc = document.getElementById('irisDesc');
+
+// draw ring ticks + f-number labels around the circle
+const tickFs = ['1.4','2.8','4','5.6','8','16'];
+tickFs.forEach((f,i)=>{
+  const angle = (-100 + i*40) * Math.PI/180; // spread across top arc
+  const cx=110, cy=110, R=96;
+  const x1=cx+Math.cos(angle)*R, y1=cy+Math.sin(angle)*R;
+  const x2=cx+Math.cos(angle)*(R-8), y2=cy+Math.sin(angle)*(R-8);
+  const lx=cx+Math.cos(angle)*(R+14), ly=cy+Math.sin(angle)*(R+14);
+  irisTicksG.innerHTML += `<line class="iris-tick" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
+    <text class="iris-label" x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle">${f}</text>`;
+});
+
+function nGon(cx,cy,r,sides,rot){
+  const pts=[];
+  for(let i=0;i<sides;i++){
+    const a = rot + (i*2*Math.PI/sides);
+    pts.push(`${(cx+Math.cos(a)*r).toFixed(1)},${(cy+Math.sin(a)*r).toFixed(1)}`);
+  }
+  return pts.join(' ');
+}
+
+function updateIris(){
+  const found = APERTURES.find(a=>a.f===state.aperture) || APERTURES[2]; // default f/4
+  irisBlade.setAttribute('points', nGon(110,110,found.r,8,Math.PI/8));
+  irisReadout.textContent = 'f/'+found.f;
+  irisDesc.textContent = found.desc;
+}
+updateIris();
+
+/* ================= SELECTIONS + PROMPT ================= */
+function renderSelections(){
+  document.querySelectorAll('.type-card').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.id===state.type);
+  });
+  document.querySelectorAll('#focalRow .focal-card').forEach(c=>{
+    c.classList.toggle('selected', Number(c.dataset.mm)===state.focal);
+  });
+  document.querySelectorAll('#apertureRow .ap-card').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.f===state.aperture);
+  });
+
+  const count = [state.type, state.focal, state.aperture].filter(v=>v!==null).length;
+  document.getElementById('selCount').textContent = count+'/3';
+
+  const parts=[];
+  if(state.type){
+    const t = LENS_TYPES.find(x=>x.id===state.type);
+    parts.push(t.frag);
+  }
+  if(state.focal){
+    const f = FOCALS.find(x=>x.mm===state.focal);
+    // avoid duplicating an mm value already implied by the lens type text
+    parts.push(`${f.mm}mm focal length, ${f.fov} degree field of view`);
+  }
+  if(state.aperture){
+    const a = APERTURES.find(x=>x.f===state.aperture);
+    parts.push(a.frag);
+  }
+
+  const promptEl = document.getElementById('promptText');
+  if(parts.length===0){
+    promptEl.innerHTML = '<span class="placeholder">위에서 렌즈 종류 · 초점거리 · 조리개를 선택하면 여기에 프롬프트가 조립됩니다.</span>';
+  } else {
+    const full = 'Professional photograph of [여기에 피사체를 적어주세요], captured with a '+parts.join(', ')+', high detail, realistic optics';
+    promptEl.textContent = full;
+  }
+}
+
+/* ================= BUTTONS ================= */
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  state.type=null; state.focal=null; state.aperture=null;
+  renderSelections();
+  updateIris();
+});
+
+document.getElementById('btnRandom').addEventListener('click', ()=>{
+  state.type = LENS_TYPES[Math.floor(Math.random()*LENS_TYPES.length)].id;
+  state.focal = FOCALS[Math.floor(Math.random()*FOCALS.length)].mm;
+  state.aperture = APERTURES[Math.floor(Math.random()*APERTURES.length)].f;
+  renderSelections();
+  updateIris();
+});
+
+document.getElementById('btnCopy').addEventListener('click', ()=>{
+  const text = document.getElementById('promptText').textContent;
+  if(!text || text.includes('선택하면 여기에')) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const toast=document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 1600);
+  }).catch(()=>{});
+});
+
+renderSelections();
+</script>
+</body>
+</html>
